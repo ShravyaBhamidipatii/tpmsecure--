@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPMSecure — Predictive Re-Enrollment with Device Authentication</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12151A;
+    --bg-raised: #191D24;
+    --bone: #E8E6DE;
+    --bone-dim: #9B9C97;
+    --copper: #C97B3E;
+    --copper-dim: #7A4E2B;
+    --verified: #5B8266;
+    --verified-glow: rgba(91,130,102,0.18);
+    --refused: #A8453D;
+    --refused-glow: rgba(168,69,61,0.18);
+    --line: #2A2F38;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--bone);
+    font-family: 'Fraunces', serif;
+    line-height: 1.5;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+  ::selection { background: var(--copper-dim); color: var(--bone); }
+
+  .hero {
+    padding: 120px 0 90px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--copper);
+    margin: 0 0 22px;
+    letter-spacing: 0.02em;
+  }
+  .hero h1 {
+    font-size: clamp(38px, 6vw, 58px);
+    font-weight: 600;
+    line-height: 1.06;
+    margin: 0 0 26px;
+    max-width: 15ch;
+  }
+  .hero p.lede {
+    font-size: 19px;
+    color: var(--bone-dim);
+    max-width: 54ch;
+    margin: 0 0 40px;
+  }
+  .seal {
+    width: 92px; height: 92px;
+    margin-bottom: 34px;
+  }
+
+  section { padding: 78px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  h2 {
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    max-width: 22ch;
+  }
+  .section-lede {
+    color: var(--bone-dim);
+    font-size: 17px;
+    max-width: 58ch;
+    margin: 0 0 44px;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  @media (max-width: 640px) { .problem-grid { grid-template-columns: 1fr; } }
+  .problem-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px 22px;
+  }
+  .problem-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--refused);
+    margin-bottom: 10px;
+  }
+  .problem-card p { margin: 0; color: var(--bone-dim); font-size: 15px; }
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .gate {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 20px;
+    padding: 22px 0;
+    cursor: pointer;
+    border-top: 1px solid var(--line);
+    transition: background 0.2s ease;
+  }
+  .gate:first-child { border-top: none; }
+  .gate:hover { background: rgba(255,255,255,0.02); }
+  .gate .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--copper);
+    padding-top: 4px;
+  }
+  .gate h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .gate .desc {
+    color: var(--bone-dim);
+    font-size: 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin 0.3s ease;
+    margin: 0;
+  }
+  .gate.open .desc {
+    max-height: 200px;
+    margin-top: 8px;
+  }
+  .gate .chev {
+    float: right;
+    color: var(--bone-dim);
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.2s ease;
+  }
+  .gate.open .chev { transform: rotate(45deg); }
+
+  .sim-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .sim-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    color: var(--bone);
+    padding: 11px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .sim-btn:hover { border-color: var(--copper); }
+  .sim-btn.active { border-color: var(--copper); background: rgba(201,123,62,0.1); }
+
+  .sim-stage {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 640px) { .sim-stage { grid-template-columns: repeat(2, 1fr); } }
+  .sim-node {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 12px;
+    text-align: center;
+    background: var(--bg-raised);
+    transition: all 0.35s ease;
+  }
+  .sim-node .name {
+    font-size: 12.5px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--bone-dim);
+    margin-bottom: 8px;
+  }
+  .sim-node .state {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--bone-dim);
+  }
+  .sim-node.pass {
+    border-color: var(--verified);
+    background: var(--verified-glow);
+  }
+  .sim-node.pass .state { color: var(--verified); }
+  .sim-node.fail {
+    border-color: var(--refused);
+    background: var(--refused-glow);
+  }
+  .sim-node.fail .state { color: var(--refused); }
+  .sim-node.pending .state { color: var(--copper); }
+
+  .terminal {
+    background: #0C0E12;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    min-height: 160px;
+    color: #B7D9C1;
+    white-space: pre-wrap;
+    line-height: 1.65;
+  }
+  .terminal .refuse-line { color: var(--refused); }
+  .terminal .pass-line { color: var(--verified); }
+  .terminal .dim-line { color: #5A6270; }
+  .cursor {
+    display: inline-block;
+    width: 7px; height: 14px;
+    background: var(--bone);
+    vertical-align: -2px;
+    animation: blink 1s step-start infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .outcome-banner {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    display: none;
+  }
+  .outcome-banner.show { display: block; }
+  .outcome-banner.pass { background: var(--verified-glow); border: 1px solid var(--verified); color: var(--verified); }
+  .outcome-banner.fail { background: var(--refused-glow); border: 1px solid var(--refused); color: var(--refused); }
+
+  .impact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .impact-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  @media (max-width: 560px) { .impact-item { grid-template-columns: 1fr; gap: 6px; } }
+  .impact-item .who {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--copper);
+    padding-top: 3px;
+  }
+  .impact-item p { margin: 0; color: var(--bone-dim); font-size: 15.5px; }
+
+  footer {
+    padding: 50px 0 70px;
+    color: var(--bone-dim);
+    font-size: 13.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  footer a { color: var(--copper); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="seal" viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" stroke="#C97B3E" stroke-width="2"/>
+      <circle cx="50" cy="50" r="34" stroke="#5A6270" stroke-width="1"/>
+      <rect x="38" y="46" width="24" height="20" rx="2" stroke="#E8E6DE" stroke-width="2"/>
+      <path d="M42 46 V38 a8 8 0 0 1 16 0 V46" stroke="#E8E6DE" stroke-width="2"/>
+      <circle cx="50" cy="56" r="2.5" fill="#C97B3E"/>
+    </svg>
+    <p class="kicker">tpmsecure // predictive disk-encryption safety</p>
+    <h1>Your disk encryption shouldn't lock you out for doing the right thing.</h1>
+    <p class="lede">TPMSecure predicts when a routine security update will break TPM-sealed disk unlock — before it happens — and verifies the device's own hardware identity before ever re-sealing the key.</p>
+  </div>
+
+  <section id="problem">
+    <h2>The problem with TPM-sealed encryption today</h2>
+    <p class="section-lede">TPMs bind a disk's decryption key to measurements of the boot process. That's the whole point — it proves nothing was tampered with. But it has a sharp edge.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="label">what should happen</div>
+        <p>You install a routine firmware or bootloader update. The system reboots. Everything unlocks normally.</p>
+      </div>
+      <div class="problem-card">
+        <div class="label">what actually happens</div>
+        <p>The update changes a measured value. The TPM no longer recognizes the boot state. The disk refuses to unlock — with no warning beforehand.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <h2>Four gates, in order</h2>
+    <p class="section-lede">Click each stage to see what it actually checks.</p>
+    <div class="pipeline" id="pipelineList">
+      <div class="gate" data-gate="1">
+        <div class="num">01</div>
+        <div>
+          <h3>Pre-flight prediction <span class="chev">+</span></h3>
+          <div class="desc">Before any update is applied, TPMSecure predicts what the resulting boot measurements would be and compares them against what's currently sealed — catching a coming lockout while there's still time to warn the user.</div>
+        </div>
+      </div>
+      <div class="gate" data-gate="2">
+        <div class="num">02</div>
+        <div>
+          <h3>PCR verification <span class="chev">+</span></h3>
+          <div class="desc">After the update completes, the real boot measurements are checked against what was predicted. A mismatch here means something unexpected happened — re-enrollment stops immediately.</div>
+        </div>
+      </div>
+      <div class="gate" data-gate="3">
+        <div class="num">03</div>
+        <div>
+          <h3>Device authentication <span class="chev">+</span></h3>
+          <div class="desc">A matching PCR state alone isn't proof of identity — it could in principle be satisfied by different hardware presenting the same measurements. This gate requires a valid TPM-backed device certificate too.</div>
+        </div>
+      </div>
+      <div class="gate" data-gate="4">
+        <div class="num">04</div>
+        <div>
+          <h3>Automatic re-enrollment <span class="chev">+</span></h3>
+          <div class="desc">Only once both checks pass does the system reseal the disk key against the new, verified boot state — automatically, with no manual recovery key entry.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulator">
+    <h2>Run the three test scenarios</h2>
+    <p class="section-lede">These are the actual scenarios used to validate the system end to end.</p>
+
+    <div class="sim-buttons">
+      <button class="sim-btn" data-scenario="a">Scenario A — legitimate update</button>
+      <button class="sim-btn" data-scenario="b">Scenario B — tampered boot state</button>
+      <button class="sim-btn" data-scenario="c">Scenario C — tampered device certificate</button>
+    </div>
+
+    <div class="sim-stage" id="simStage">
+      <div class="sim-node" data-node="predict"><div class="name">predict</div><div class="state">idle</div></div>
+      <div class="sim-node" data-node="pcr"><div class="name">pcr check</div><div class="state">idle</div></div>
+      <div class="sim-node" data-node="cert"><div class="name">device cert</div><div class="state">idle</div></div>
+      <div class="sim-node" data-node="reenroll"><div class="name">re-enroll</div><div class="state">idle</div></div>
+    </div>
+
+    <div class="terminal" id="terminalOut">$ <span class="cursor"></span></div>
+    <div class="outcome-banner" id="outcomeBanner"></div>
+  </section>
+
+  <section id="impact">
+    <h2>Why this matters</h2>
+    <p class="section-lede">A locked-out disk isn't an inconvenience — it's downtime, lost access, and in some cases data that's effectively gone until a recovery key surfaces.</p>
+    <div class="impact-list">
+      <div class="impact-item">
+        <div class="who">servers</div>
+        <p>A remote server that fails to unlock after a routine patch means a physical visit or a painful out-of-band recovery process — TPMSecure catches the mismatch before the reboot that would cause it.</p>
+      </div>
+      <div class="impact-item">
+        <div class="who">developers</div>
+        <p>Workstations with full-disk encryption are common in security-conscious teams. An unplanned lockout costs a day of work recovering keys instead of shipping.</p>
+      </div>
+      <div class="impact-item">
+        <div class="who">security teams</div>
+        <p>The device certificate gate closes a real gap: a PCR match alone can't distinguish the original trusted hardware from a different device presenting the same measurements.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">TPMSecure — built on TPM 2.0, LUKS2, systemd-cryptenroll, and systemd-pcrlock.</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.gate').forEach(gate => {
+    gate.addEventListener('click', () => {
+      const isOpen = gate.classList.contains('open');
+      document.querySelectorAll('.gate').forEach(g => g.classList.remove('open'));
+      if (!isOpen) gate.classList.add('open');
+    });
+  });
+
+  const scenarios = {
+    a: {
+      lines: [
+        { t: '$ systemd-pcrlock predict', c: 'dim-line' },
+        { t: 'predicted PCR state matches current seal', c: 'pass-line' },
+        { t: '$ apply update && reboot', c: 'dim-line' },
+        { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
+        { t: 'PCR check: observed state matches prediction ✓', c: 'pass-line' },
+        { t: '$ openssl x509 -in device_cert.pem -noout -fingerprint', c: 'dim-line' },
+        { t: 'fingerprint matches known-good record ✓', c: 'pass-line' },
+        { t: '$ systemd-cryptenroll --tpm2-pcrs=0+1+2+3+4+5+6+7 /dev/sda2', c: 'dim-line' },
+        { t: 're-enrollment complete — disk resealed to new trusted state', c: 'pass-line' },
+      ],
+      nodes: { predict: 'pass', pcr: 'pass', cert: 'pass', reenroll: 'pass' },
+      outcome: { type: 'pass', text: 'RESULT: unlocked automatically. New boot state re-sealed. No manual action needed.' }
+    },
+    b: {
+      lines: [
+        { t: '$ systemd-pcrlock predict', c: 'dim-line' },
+        { t: 'predicted PCR 3: 3d458cfe...f198e7969', c: 'dim-line' },
+        { t: '$ apply update && reboot', c: 'dim-line' },
+        { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
+        { t: 'observed PCR 3: 369bb94ceb...335e70ad', c: 'refuse-line' },
+        { t: 'ERROR: Failed to unseal secret using TPM2: state not recoverable', c: 'refuse-line' },
+        { t: 'PCR mismatch detected — refusing automatic unlock', c: 'refuse-line' },
+        { t: 'falling back to manual passphrase entry', c: 'dim-line' },
+      ],
+      nodes: { predict: 'pass', pcr: 'fail', cert: 'idle', reenroll: 'fail' },
+      outcome: { type: 'fail', text: 'RESULT: refused before device check. Falls back to manual passphrase — no silent lockout.' }
+    },
+    c: {
+      lines: [
+        { t: '$ systemd-pcrlock predict', c: 'dim-line' },
+        { t: 'predicted PCR state matches current seal', c: 'pass-line' },
+        { t: '$ apply update && reboot', c: 'dim-line' },
+        { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
+        { t: 'PCR check: observed state matches prediction ✓', c: 'pass-line' },
+        { t: '$ openssl x509 -in presented_cert.pem -noout -fingerprint', c: 'dim-line' },
+        { t: 'sha256 Fingerprint=43:BB:9E:05:9B:F4:...:F4:AB', c: 'dim-line' },
+        { t: 'known-good Fingerprint=66:71:B0:5F:ED:...:65:4F', c: 'dim-line' },
+        { t: 'Certificate mismatch — refusing re-enrollment', c: 'refuse-line' },
+      ],
+      nodes: { predict: 'pass', pcr: 'pass', cert: 'fail', reenroll: 'fail' },
+      outcome: { type: 'fail', text: 'RESULT: PCR matched, but the device certificate didn\'t. Re-enrollment refused independently of the PCR check.' }
+    }
+  };
+
+  const termEl = document.getElementById('terminalOut');
+  const banner = document.getElementById('outcomeBanner');
+  const nodeEls = document.querySelectorAll('.sim-node');
+  let running = false;
+
+  function resetStage() {
+    nodeEls.forEach(n => {
+      n.classList.remove('pass', 'fail', 'pending');
+      n.querySelector('.state').textContent = 'idle';
+    });
+    banner.classList.remove('show', 'pass', 'fail');
+  }
+
+  async function runScenario(key) {
+    if (running) return;
+    running = true;
+    document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-scenario="${key}"]`).classList.add('active');
+    resetStage();
+    termEl.innerHTML = '';
+    const data = scenarios[key];
+
+    for (const line of data.lines) {
+      await sleep(420);
+      const div = document.createElement('div');
+      div.className = line.c;
+      div.textContent = line.t;
+      termEl.appendChild(div);
+      termEl.scrollTop = termEl.scrollHeight;
+    }
+    const cursorDiv = document.createElement('div');
+    cursorDiv.innerHTML = '$ <span class="cursor"></span>';
+    termEl.appendChild(cursorDiv);
+
+    for (const [key2, state] of Object.entries(data.nodes)) {
+      const el = document.querySelector(`[data-node="${key2}"]`);
+      if (state === 'idle') continue;
+      el.classList.add(state);
+      el.querySelector('.state').textContent = state === 'pass' ? 'passed' : state === 'fail' ? 'refused' : 'idle';
+    }
+
+    banner.textContent = data.outcome.text;
+    banner.classList.add('show', data.outcome.type);
+    running = false;
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  document.querySelectorAll('.sim-btn').forEach(btn => {
+    btn.addEventListener('click', () => runScenario(btn.dataset.scenario));
+  });
+</script>
+
+</body>
+</html>
