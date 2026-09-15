@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPMSecure — From First Principles to Implementation</title>
+<title>TPMSecure: From First Principles to Implementation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -188,13 +188,13 @@
     </svg>
     <p class="kicker">tpmsecure // predictive disk-encryption safety</p>
     <h1>Your disk encryption shouldn't lock you out for doing the right thing.</h1>
-    <p class="lede">This page explains the whole idea from zero — what disk encryption even is, why a chip inside your computer gets involved, and what actually breaks. If you already know the terms, skip straight to the pipeline or the technical section.</p>
-    <div class="audience-note">no prior knowledge required — jump to "for researchers" if you want the internals</div>
+    <p class="lede">This page explains the whole idea from zero. What disk encryption even is, why a chip inside your computer gets involved, and what actually breaks. If you already know the terms, skip straight to the pipeline or the technical section.</p>
+    <div class="audience-note">no prior knowledge required. Jump to "for researchers" if you want the internals</div>
     <p class="scrolldown" style="margin-top:24px;">↓ scroll</p>
   </div>
 
   <section id="basics">
-    <p class="eyebrow reveal">01 — the building blocks</p>
+    <p class="eyebrow reveal">01. the building blocks</p>
     <h2 class="reveal">Four ideas, explained plainly</h2>
     <p class="section-lede reveal">Everything else on this page is built from these four pieces. Each has a "go deeper" button if you already know the term and want the precise technical detail.</p>
 
@@ -205,7 +205,7 @@
         <h3>Disk Encryption</h3>
         <p class="term">the idea of scrambling your files</p>
         <div class="analogy"><b>Think of it like:</b> writing your diary in a secret code. If someone steals the notebook, they just see gibberish unless they have the key to decode it.</div>
-        <p class="plain">Your computer's storage holds this scrambled version of your files at all times. Something has to hold the "key" that turns the gibberish back into readable data — and that something needs to be trusted.</p>
+        <p class="plain">Your computer's storage holds this scrambled version of your files at all times. Something has to hold the "key" that turns the gibberish back into readable data, and that something needs to be trusted.</p>
         <button class="go-deeper-btn" data-target="deep1">go deeper &#8964;</button>
         <div class="deeper-content" id="deep1">Full-disk encryption typically uses a symmetric cipher (e.g. AES-256-XTS) over the entire block device. The actual encryption key is itself usually wrapped/encrypted by a key-derivation function, so the real secret you protect is much smaller than the disk itself.</div>
       </div>
@@ -215,9 +215,9 @@
         <h3>LUKS</h3>
         <p class="term">Linux Unified Key Setup</p>
         <div class="analogy"><b>Think of it like:</b> a specific, standardized brand of lock. Anyone can recognize a LUKS-encrypted disk and knows exactly how to interact with its lock, even across different tools and distributions.</div>
-        <p class="plain">LUKS is the standard way Linux systems actually implement disk encryption. It manages the scrambled data, stores metadata about how it's locked, and supports multiple ways to unlock the same disk — a password, a key file, or (relevant here) a hardware chip.</p>
+        <p class="plain">LUKS is the standard way Linux systems actually implement disk encryption. It manages the scrambled data, stores metadata about how it's locked, and supports multiple ways to unlock the same disk: a password, a key file, or (relevant here) a hardware chip.</p>
         <button class="go-deeper-btn" data-target="deep2">go deeper &#8964;</button>
-        <div class="deeper-content" id="deep2">LUKS2 stores a header with keyslots — each keyslot is an independently encrypted copy of the master key, unlockable by a different method. This project uses <span class="mono">cryptsetup luksFormat</span> and <span class="mono">luksOpen</span>, then adds a TPM2-backed keyslot via <span class="mono">systemd-cryptenroll</span>.</div>
+        <div class="deeper-content" id="deep2">LUKS2 stores a header with keyslots. Each keyslot is an independently encrypted copy of the master key, unlockable by a different method. This project uses <span class="mono">cryptsetup luksFormat</span> and <span class="mono">luksOpen</span>, then adds a TPM2-backed keyslot via <span class="mono">systemd-cryptenroll</span>.</div>
       </div>
 
       <div class="concept-card">
@@ -225,7 +225,7 @@
         <h3>TPM</h3>
         <p class="term">Trusted Platform Module</p>
         <div class="analogy"><b>Think of it like:</b> a tiny, tamper-resistant safe soldered onto the motherboard. It holds the key to your diary, but it only hands it over automatically if the computer looks exactly the way it's supposed to.</div>
-        <p class="plain">Instead of you typing a password every single boot, the TPM can hold the disk's unlock key and release it automatically — but only if it recognizes the state of the machine as trustworthy. If something about the boot process looks different, it refuses.</p>
+        <p class="plain">Instead of you typing a password every single boot, the TPM can hold the disk's unlock key and release it automatically, but only if it recognizes the state of the machine as trustworthy. If something about the boot process looks different, it refuses.</p>
         <button class="go-deeper-btn" data-target="deep3">go deeper &#8964;</button>
         <div class="deeper-content" id="deep3">A TPM 2.0 chip provides a hardware root of trust: key sealing, random number generation, and measured boot support. Keys can be sealed to specific PCR policies so they only unseal under a matching platform state. This project uses <span class="mono">tpm2-tools</span> and <span class="mono">swtpm</span> (software TPM) for development.</div>
       </div>
@@ -234,8 +234,8 @@
         <div class="step-badge">4</div>
         <h3>PCR</h3>
         <p class="term">Platform Configuration Register</p>
-        <div class="analogy"><b>Think of it like:</b> a fingerprint the TPM builds up as your computer boots — one number that summarizes firmware, bootloader, and OS state. Change any of those, even slightly, and the fingerprint comes out completely different.</div>
-        <p class="plain">This is the actual thing the TPM checks before releasing the key. If a security update changes firmware or the bootloader, the fingerprint changes too — and the TPM, correctly, no longer recognizes the machine as the one it originally trusted.</p>
+        <div class="analogy"><b>Think of it like:</b> a fingerprint the TPM builds up as your computer boots: one number that summarizes firmware, bootloader, and OS state. Change any of those, even slightly, and the fingerprint comes out completely different.</div>
+        <p class="plain">This is the actual thing the TPM checks before releasing the key. If a security update changes firmware or the bootloader, the fingerprint changes too, and the TPM, correctly, no longer recognizes the machine as the one it originally trusted.</p>
         <button class="go-deeper-btn" data-target="deep4">go deeper &#8964;</button>
         <div class="deeper-content" id="deep4">PCRs are extended (never directly overwritten) via <span class="mono">PCR_new = SHA256(PCR_old || measurement)</span> during boot, forming a hash chain. This project reads/predicts PCR state with <span class="mono">tpm2_pcrread</span> and <span class="mono">systemd-pcrlock predict</span>.</div>
       </div>
@@ -248,7 +248,7 @@
   </section>
 
   <section id="problem">
-    <p class="eyebrow reveal">02 — the problem</p>
+    <p class="eyebrow reveal">02. the problem</p>
     <h2 class="reveal">A sharp edge nobody plans for</h2>
     <p class="section-lede reveal">Now that the four pieces are on the table, here's exactly where they collide.</p>
     <div class="problem-grid reveal">
@@ -258,7 +258,7 @@
       </div>
       <div class="problem-card">
         <div class="label">what actually happens</div>
-        <p>The update legitimately changes the boot measurements. The new PCR fingerprint doesn't match what the TPM originally sealed the key against. The disk refuses to unlock — with no warning beforehand.</p>
+        <p>The update legitimately changes the boot measurements. The new PCR fingerprint doesn't match what the TPM originally sealed the key against. The disk refuses to unlock, with no warning beforehand.</p>
       </div>
     </div>
     <table class="compare reveal" style="margin-top:36px;">
@@ -271,41 +271,41 @@
   </section>
 
   <section id="pipeline">
-    <p class="eyebrow reveal">03 — how it works</p>
+    <p class="eyebrow reveal">03. how it works</p>
     <h2 class="reveal">Four gates, in order</h2>
     <p class="section-lede reveal">Click each stage to see what it actually checks.</p>
     <div class="pipeline reveal" id="pipelineList">
       <div class="gate" data-gate="1">
         <div class="num">01</div>
         <div><h3>Pre-flight prediction <span class="chev">+</span></h3>
-        <div class="desc">Before any update is applied, TPMSecure predicts what the resulting PCR fingerprint would be and compares it against what's currently sealed &mdash; catching a coming lockout while there's still time to warn the user.</div></div>
+        <div class="desc">Before any update is applied, TPMSecure predicts what the resulting PCR fingerprint would be and compares it against what's currently sealed, catching a coming lockout while there's still time to warn the user.</div></div>
       </div>
       <div class="gate" data-gate="2">
         <div class="num">02</div>
         <div><h3>PCR verification <span class="chev">+</span></h3>
-        <div class="desc">After the update completes, the real PCR fingerprint is checked against what was predicted. A mismatch here means something unexpected happened &mdash; re-enrollment stops immediately.</div></div>
+        <div class="desc">After the update completes, the real PCR fingerprint is checked against what was predicted. A mismatch here means something unexpected happened, so re-enrollment stops immediately.</div></div>
       </div>
       <div class="gate" data-gate="3">
         <div class="num">03</div>
         <div><h3>Device authentication <span class="chev">+</span></h3>
-        <div class="desc">A matching fingerprint alone isn't proof of identity &mdash; it could in principle be satisfied by different hardware presenting the same measurements. This gate requires a valid TPM-backed device certificate too.</div></div>
+        <div class="desc">A matching fingerprint alone isn't proof of identity. It could in principle be satisfied by different hardware presenting the same measurements. This gate requires a valid TPM-backed device certificate too.</div></div>
       </div>
       <div class="gate" data-gate="4">
         <div class="num">04</div>
         <div><h3>Automatic re-enrollment <span class="chev">+</span></h3>
-        <div class="desc">Only once both checks pass does the system reseal the disk key against the new, verified boot state &mdash; automatically, with no manual recovery key entry.</div></div>
+        <div class="desc">Only once both checks pass does the system reseal the disk key against the new, verified boot state, automatically, with no manual recovery key entry.</div></div>
       </div>
     </div>
   </section>
 
   <section id="simulator">
-    <p class="eyebrow reveal">04 — try it</p>
+    <p class="eyebrow reveal">04. try it</p>
     <h2 class="reveal">Run the three test scenarios</h2>
     <p class="section-lede reveal">These are the actual scenarios used to validate the system end to end.</p>
     <div class="sim-buttons reveal">
-      <button class="sim-btn" data-scenario="a">Scenario A — legitimate update</button>
-      <button class="sim-btn" data-scenario="b">Scenario B — tampered boot state</button>
-      <button class="sim-btn" data-scenario="c">Scenario C — tampered device certificate</button>
+      <button class="sim-btn" data-scenario="a">Scenario A: legitimate update</button>
+      <button class="sim-btn" data-scenario="b">Scenario B: tampered boot state</button>
+      <button class="sim-btn" data-scenario="c">Scenario C: tampered device certificate</button>
     </div>
     <div class="sim-stage reveal" id="simStage">
       <div class="sim-node" data-node="predict"><div class="name">predict</div><div class="state">idle</div></div>
@@ -318,9 +318,9 @@
   </section>
 
   <section id="usecases">
-    <p class="eyebrow reveal">05 — who this helps</p>
+    <p class="eyebrow reveal">05. who this helps</p>
     <h2 class="reveal">Real situations this prevents</h2>
-    <p class="section-lede reveal">TPM-sealed disk encryption shows up in more places than people realize — anywhere full-disk encryption plus a hardware root of trust is used.</p>
+    <p class="section-lede reveal">TPM-sealed disk encryption shows up in more places than people realize, anywhere full-disk encryption plus a hardware root of trust is used.</p>
     <div class="usecase-grid reveal">
       <div class="usecase-card">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C97B3E" stroke-width="1.5"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/><circle cx="7" cy="7.5" r="0.6" fill="#C97B3E"/><circle cx="7" cy="16.5" r="0.6" fill="#C97B3E"/></svg>
@@ -343,7 +343,7 @@
       <div class="usecase-card">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C97B3E" stroke-width="1.5"><path d="M4 21v-6a4 4 0 014-4h8a4 4 0 014 4v6"/><circle cx="12" cy="7" r="3"/></svg>
         <h4>Healthcare &amp; regulated devices</h4>
-        <p>Encrypted patient-record systems and medical devices often can't tolerate an unplanned reboot into a locked state &mdash; predictable, auditable unlock behavior matters.</p>
+        <p>Encrypted patient-record systems and medical devices often can't tolerate an unplanned reboot into a locked state. Predictable, auditable unlock behavior matters.</p>
         <div class="stat">impact: fewer compliance-relevant incidents</div>
       </div>
       <div class="usecase-card">
@@ -362,9 +362,9 @@
   </section>
 
   <section id="research">
-    <p class="eyebrow reveal">06 — for researchers &amp; reviewers</p>
+    <p class="eyebrow reveal">06. for researchers &amp; reviewers</p>
     <h2 class="reveal">Technical implementation detail</h2>
-    <p class="section-lede reveal">The plain-language explanations above map directly onto these commands and mechanisms &mdash; nothing here is simplified further.</p>
+    <p class="section-lede reveal">The plain-language explanations above map directly onto these commands and mechanisms. Nothing here is simplified further.</p>
 
     <div class="research-card reveal">
       <h4>LUKS2 volume + TPM2 keyslot enrollment</h4>
@@ -417,24 +417,24 @@ Enter passphrase for /home/.../testdisk.img: _</div>
   </section>
 
   <section id="faq">
-    <p class="eyebrow reveal">07 — questions</p>
+    <p class="eyebrow reveal">07. questions</p>
     <h2 class="reveal">Common questions</h2>
     <div class="reveal">
       <div class="faq-item" data-faq>
         <h4>Does this replace LUKS or the TPM? <span class="plus">+</span></h4>
-        <div class="a">No &mdash; it sits on top of both. LUKS still does the actual encryption, and the TPM still does the actual sealing. TPMSecure adds prediction, verification, and identity-checking around that existing mechanism.</div>
+        <div class="a">No. It sits on top of both. LUKS still does the actual encryption, and the TPM still does the actual sealing. TPMSecure adds prediction, verification, and identity-checking around that existing mechanism.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>What happens if the prediction is wrong? <span class="plus">+</span></h4>
-        <div class="a">The system never trusts the prediction blindly &mdash; it always re-verifies the real, observed PCR state after the update actually happens. Prediction only provides an early warning, not the final decision.</div>
+        <div class="a">The system never trusts the prediction blindly. It always re-verifies the real, observed PCR state after the update actually happens. Prediction only provides an early warning, not the final decision.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>Why is a device certificate needed if PCRs already match? <span class="plus">+</span></h4>
-        <div class="a">PCR values describe the state of software and firmware &mdash; not which physical device produced them. The certificate ties re-enrollment to a specific piece of hardware, closing that gap.</div>
+        <div class="a">PCR values describe the state of software and firmware, not which physical device produced them. The certificate ties re-enrollment to a specific piece of hardware, closing that gap.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>What if both checks fail? <span class="plus">+</span></h4>
-        <div class="a">The system refuses automatic re-enrollment entirely and falls back to the normal manual passphrase &mdash; the same safety net that exists today, just reached only when genuinely needed.</div>
+        <div class="a">The system refuses automatic re-enrollment entirely and falls back to the normal manual passphrase, the same safety net that exists today, just reached only when genuinely needed.</div>
       </div>
     </div>
   </section>
@@ -442,7 +442,7 @@ Enter passphrase for /home/.../testdisk.img: _</div>
 </div>
 
 <footer>
-  <div class="wrap">TPMSecure &mdash; built on TPM 2.0, LUKS2, systemd-cryptenroll, and systemd-pcrlock.</div>
+  <div class="wrap">TPMSecure. Built on TPM 2.0, LUKS2, systemd-cryptenroll, and systemd-pcrlock.</div>
 </footer>
 
 <script>
