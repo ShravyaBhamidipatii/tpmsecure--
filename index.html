@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPMSecure — Predictive Re-Enrollment with Device Authentication</title>
+<title>TPMSecure — From First Principles to Implementation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -23,50 +23,71 @@
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--bone);
-    font-family: 'Fraunces', serif;
-    line-height: 1.55;
-  }
+  body { margin: 0; background: var(--bg); color: var(--bone); font-family: 'Fraunces', serif; line-height: 1.55; }
   .mono { font-family: 'JetBrains Mono', monospace; }
-  .wrap { max-width: 780px; margin: 0 auto; padding: 0 28px; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 28px; }
   ::selection { background: var(--copper-dim); color: var(--bone); }
 
-  #progress {
-    position: fixed; top: 0; left: 0; height: 3px;
-    background: var(--copper); width: 0%; z-index: 100;
-    transition: width 0.1s linear;
-  }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--copper); width: 0%; z-index: 100; transition: width 0.1s linear; }
 
-  #dotnav {
-    position: fixed; right: 22px; top: 50%; transform: translateY(-50%);
-    display: flex; flex-direction: column; gap: 14px; z-index: 90;
-  }
-  #dotnav a {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--line); display: block;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
+  #dotnav { position: fixed; right: 22px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 13px; z-index: 90; }
+  #dotnav a { width: 8px; height: 8px; border-radius: 50%; background: var(--line); display: block; transition: background 0.2s ease, transform 0.2s ease; }
   #dotnav a.active { background: var(--copper); transform: scale(1.4); }
-  @media (max-width: 900px) { #dotnav { display: none; } }
+  @media (max-width: 980px) { #dotnav { display: none; } }
 
   .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .reveal.in { opacity: 1; transform: translateY(0); }
 
-  .hero { padding: 130px 0 100px; border-bottom: 1px solid var(--line); }
+  .hero { padding: 120px 0 90px; border-bottom: 1px solid var(--line); }
   .hero .kicker { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--copper); margin: 0 0 22px; }
-  .hero h1 { font-size: clamp(38px, 6vw, 58px); font-weight: 600; line-height: 1.06; margin: 0 0 26px; max-width: 15ch; }
-  .hero p.lede { font-size: 19px; color: var(--bone-dim); max-width: 54ch; margin: 0 0 34px; }
-  .seal { width: 92px; height: 92px; margin-bottom: 34px; }
+  .hero h1 { font-size: clamp(36px, 5.6vw, 54px); font-weight: 600; line-height: 1.08; margin: 0 0 24px; max-width: 16ch; }
+  .hero p.lede { font-size: 18px; color: var(--bone-dim); max-width: 56ch; margin: 0 0 30px; }
+  .seal { width: 86px; height: 86px; margin-bottom: 30px; }
   .scrolldown { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--bone-dim); }
+  .audience-note {
+    display: inline-block; margin-top: 6px; padding: 8px 14px; border: 1px solid var(--line);
+    border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--bone-dim);
+  }
 
-  section { padding: 84px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 40px; }
+  section { padding: 80px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 40px; }
   section:last-of-type { border-bottom: none; }
   .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--copper); margin: 0 0 14px; }
-  h2 { font-size: 30px; font-weight: 600; margin: 0 0 14px; max-width: 24ch; }
-  .section-lede { color: var(--bone-dim); font-size: 17px; max-width: 58ch; margin: 0 0 44px; }
+  h2 { font-size: 29px; font-weight: 600; margin: 0 0 14px; max-width: 24ch; }
+  .section-lede { color: var(--bone-dim); font-size: 16.5px; max-width: 58ch; margin: 0 0 40px; }
+
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 700px) { .concept-grid { grid-template-columns: 1fr; } }
+  .concept-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: 8px; padding: 24px; }
+  .concept-card .step-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--copper);
+    color: var(--copper); font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 14px;
+  }
+  .concept-card h3 { font-size: 19px; font-weight: 600; margin: 0 0 4px; }
+  .concept-card .term { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--bone-dim); margin: 0 0 14px; }
+  .concept-card .analogy {
+    font-size: 15px; color: var(--bone); margin: 0 0 14px; padding: 12px 14px;
+    background: rgba(201,123,62,0.08); border-left: 2px solid var(--copper); border-radius: 2px;
+  }
+  .concept-card .analogy b { color: var(--copper); font-weight: 600; }
+  .concept-card p.plain { color: var(--bone-dim); font-size: 14.5px; margin: 0 0 14px; }
+  .go-deeper-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--copper); background: none;
+    border: 1px solid var(--copper-dim); border-radius: 4px; padding: 7px 12px; cursor: pointer;
+  }
+  .go-deeper-btn:hover { background: rgba(201,123,62,0.1); }
+  .deeper-content {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease, margin 0.35s ease;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #B7D9C1; margin-top: 0;
+    background: #0C0E12; border-radius: 4px;
+  }
+  .deeper-content.open { max-height: 240px; margin-top: 12px; padding: 12px 14px; }
+
+  .chain-note {
+    margin-top: 26px; padding: 16px 18px; border: 1px dashed var(--line); border-radius: 6px;
+    font-size: 14.5px; color: var(--bone-dim); text-align: center;
+  }
+  .chain-note .mono { color: var(--copper); }
 
   .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
   @media (max-width: 640px) { .problem-grid { grid-template-columns: 1fr; } }
@@ -124,6 +145,12 @@
   .usecase-card p { margin: 0 0 10px; color: var(--bone-dim); font-size: 14.5px; }
   .usecase-card .stat { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--copper); }
 
+  .research-card { background: var(--bg-raised-2); border: 1px solid var(--line); border-radius: 8px; padding: 26px; margin-bottom: 18px; }
+  .research-card h4 { font-size: 17px; margin: 0 0 10px; font-weight: 600; color: var(--bone); }
+  .research-card p { color: var(--bone-dim); font-size: 14.5px; margin: 0 0 12px; }
+  .codeblock { background: #0C0E12; border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #B7D9C1; overflow-x: auto; white-space: pre; }
+  .codeblock .c1 { color: #5A6270; }
+
   .faq-item { border-top: 1px solid var(--line); padding: 20px 0; cursor: pointer; }
   .faq-item:last-child { border-bottom: 1px solid var(--line); }
   .faq-item h4 { font-size: 16.5px; font-weight: 600; margin: 0; display: flex; justify-content: space-between; align-items: center; }
@@ -140,11 +167,12 @@
 
 <div id="progress"></div>
 <nav id="dotnav">
+  <a href="#basics" data-sec="basics"></a>
   <a href="#problem" data-sec="problem"></a>
-  <a href="#compare" data-sec="compare"></a>
   <a href="#pipeline" data-sec="pipeline"></a>
   <a href="#simulator" data-sec="simulator"></a>
   <a href="#usecases" data-sec="usecases"></a>
+  <a href="#research" data-sec="research"></a>
   <a href="#faq" data-sec="faq"></a>
 </nav>
 
@@ -160,33 +188,82 @@
     </svg>
     <p class="kicker">tpmsecure // predictive disk-encryption safety</p>
     <h1>Your disk encryption shouldn't lock you out for doing the right thing.</h1>
-    <p class="lede">TPMSecure predicts when a routine security update will break TPM-sealed disk unlock — before it happens — and verifies the device's own hardware identity before ever re-sealing the key. Scroll to see how, where it applies, and what it replaces.</p>
-    <p class="scrolldown">↓ scroll</p>
+    <p class="lede">This page explains the whole idea from zero — what disk encryption even is, why a chip inside your computer gets involved, and what actually breaks. If you already know the terms, skip straight to the pipeline or the technical section.</p>
+    <div class="audience-note">no prior knowledge required — jump to "for researchers" if you want the internals</div>
+    <p class="scrolldown" style="margin-top:24px;">↓ scroll</p>
   </div>
 
-  <section id="problem">
-    <p class="eyebrow reveal">01 — the problem</p>
-    <h2 class="reveal">A sharp edge in TPM-sealed encryption</h2>
-    <p class="section-lede reveal">TPMs bind a disk's decryption key to measurements of the boot process. That's the whole point — it proves nothing was tampered with. But it has a failure mode almost nobody plans for.</p>
-    <div class="problem-grid reveal">
-      <div class="problem-card">
-        <div class="label">what should happen</div>
-        <p>You install a routine firmware or bootloader update. The system reboots. Everything unlocks normally.</p>
+  <section id="basics">
+    <p class="eyebrow reveal">01 — the building blocks</p>
+    <h2 class="reveal">Four ideas, explained plainly</h2>
+    <p class="section-lede reveal">Everything else on this page is built from these four pieces. Each has a "go deeper" button if you already know the term and want the precise technical detail.</p>
+
+    <div class="concept-grid reveal">
+
+      <div class="concept-card">
+        <div class="step-badge">1</div>
+        <h3>Disk Encryption</h3>
+        <p class="term">the idea of scrambling your files</p>
+        <div class="analogy"><b>Think of it like:</b> writing your diary in a secret code. If someone steals the notebook, they just see gibberish unless they have the key to decode it.</div>
+        <p class="plain">Your computer's storage holds this scrambled version of your files at all times. Something has to hold the "key" that turns the gibberish back into readable data — and that something needs to be trusted.</p>
+        <button class="go-deeper-btn" data-target="deep1">go deeper &#8964;</button>
+        <div class="deeper-content" id="deep1">Full-disk encryption typically uses a symmetric cipher (e.g. AES-256-XTS) over the entire block device. The actual encryption key is itself usually wrapped/encrypted by a key-derivation function, so the real secret you protect is much smaller than the disk itself.</div>
       </div>
-      <div class="problem-card">
-        <div class="label">what actually happens</div>
-        <p>The update changes a measured value. The TPM no longer recognizes the boot state. The disk refuses to unlock — with no warning beforehand.</p>
+
+      <div class="concept-card">
+        <div class="step-badge">2</div>
+        <h3>LUKS</h3>
+        <p class="term">Linux Unified Key Setup</p>
+        <div class="analogy"><b>Think of it like:</b> a specific, standardized brand of lock. Anyone can recognize a LUKS-encrypted disk and knows exactly how to interact with its lock, even across different tools and distributions.</div>
+        <p class="plain">LUKS is the standard way Linux systems actually implement disk encryption. It manages the scrambled data, stores metadata about how it's locked, and supports multiple ways to unlock the same disk — a password, a key file, or (relevant here) a hardware chip.</p>
+        <button class="go-deeper-btn" data-target="deep2">go deeper &#8964;</button>
+        <div class="deeper-content" id="deep2">LUKS2 stores a header with keyslots — each keyslot is an independently encrypted copy of the master key, unlockable by a different method. This project uses <span class="mono">cryptsetup luksFormat</span> and <span class="mono">luksOpen</span>, then adds a TPM2-backed keyslot via <span class="mono">systemd-cryptenroll</span>.</div>
       </div>
+
+      <div class="concept-card">
+        <div class="step-badge">3</div>
+        <h3>TPM</h3>
+        <p class="term">Trusted Platform Module</p>
+        <div class="analogy"><b>Think of it like:</b> a tiny, tamper-resistant safe soldered onto the motherboard. It holds the key to your diary, but it only hands it over automatically if the computer looks exactly the way it's supposed to.</div>
+        <p class="plain">Instead of you typing a password every single boot, the TPM can hold the disk's unlock key and release it automatically — but only if it recognizes the state of the machine as trustworthy. If something about the boot process looks different, it refuses.</p>
+        <button class="go-deeper-btn" data-target="deep3">go deeper &#8964;</button>
+        <div class="deeper-content" id="deep3">A TPM 2.0 chip provides a hardware root of trust: key sealing, random number generation, and measured boot support. Keys can be sealed to specific PCR policies so they only unseal under a matching platform state. This project uses <span class="mono">tpm2-tools</span> and <span class="mono">swtpm</span> (software TPM) for development.</div>
+      </div>
+
+      <div class="concept-card">
+        <div class="step-badge">4</div>
+        <h3>PCR</h3>
+        <p class="term">Platform Configuration Register</p>
+        <div class="analogy"><b>Think of it like:</b> a fingerprint the TPM builds up as your computer boots — one number that summarizes firmware, bootloader, and OS state. Change any of those, even slightly, and the fingerprint comes out completely different.</div>
+        <p class="plain">This is the actual thing the TPM checks before releasing the key. If a security update changes firmware or the bootloader, the fingerprint changes too — and the TPM, correctly, no longer recognizes the machine as the one it originally trusted.</p>
+        <button class="go-deeper-btn" data-target="deep4">go deeper &#8964;</button>
+        <div class="deeper-content" id="deep4">PCRs are extended (never directly overwritten) via <span class="mono">PCR_new = SHA256(PCR_old || measurement)</span> during boot, forming a hash chain. This project reads/predicts PCR state with <span class="mono">tpm2_pcrread</span> and <span class="mono">systemd-pcrlock predict</span>.</div>
+      </div>
+
+    </div>
+
+    <div class="chain-note reveal">
+      Put together: <span class="mono">disk encryption</span> scrambles your files &rarr; <span class="mono">LUKS</span> manages the lock &rarr; the <span class="mono">TPM</span> holds the key &rarr; it only releases that key if the <span class="mono">PCR</span> fingerprint still matches. That last link is exactly where things go wrong today.
     </div>
   </section>
 
-  <section id="compare">
-    <p class="eyebrow reveal">02 — before / after</p>
-    <h2 class="reveal">What changes with TPMSecure in place</h2>
-    <p class="section-lede reveal">Same TPM, same LUKS encryption underneath — the difference is entirely in what happens around an update.</p>
-    <table class="compare reveal">
+  <section id="problem">
+    <p class="eyebrow reveal">02 — the problem</p>
+    <h2 class="reveal">A sharp edge nobody plans for</h2>
+    <p class="section-lede reveal">Now that the four pieces are on the table, here's exactly where they collide.</p>
+    <div class="problem-grid reveal">
+      <div class="problem-card">
+        <div class="label">what should happen</div>
+        <p>You install a routine firmware or bootloader update. The system reboots. The PCR fingerprint is recalculated, the TPM releases the key, and everything unlocks normally.</p>
+      </div>
+      <div class="problem-card">
+        <div class="label">what actually happens</div>
+        <p>The update legitimately changes the boot measurements. The new PCR fingerprint doesn't match what the TPM originally sealed the key against. The disk refuses to unlock — with no warning beforehand.</p>
+      </div>
+    </div>
+    <table class="compare reveal" style="margin-top:36px;">
       <tr><th>Moment</th><th>Without TPMSecure</th><th>With TPMSecure</th></tr>
-      <tr><td>Before an update</td><td class="without">No visibility into what will break</td><td class="with">Predicts the resulting boot state first</td></tr>
+      <tr><td>Before an update</td><td class="without">No visibility into what will break</td><td class="with">Predicts the resulting PCR state first</td></tr>
       <tr><td>After a mismatch</td><td class="without">Silent lockout, disk simply won't unlock</td><td class="with">Detected and reported, safe passphrase fallback</td></tr>
       <tr><td>Restoring trust</td><td class="without">Manual re-seal, often needs a recovery key</td><td class="with">Automatic re-enrollment once verified</td></tr>
       <tr><td>Identity check</td><td class="without">PCR match alone is treated as sufficient</td><td class="with">Requires a valid device certificate too</td></tr>
@@ -201,22 +278,22 @@
       <div class="gate" data-gate="1">
         <div class="num">01</div>
         <div><h3>Pre-flight prediction <span class="chev">+</span></h3>
-        <div class="desc">Before any update is applied, TPMSecure predicts what the resulting boot measurements would be and compares them against what's currently sealed — catching a coming lockout while there's still time to warn the user.</div></div>
+        <div class="desc">Before any update is applied, TPMSecure predicts what the resulting PCR fingerprint would be and compares it against what's currently sealed &mdash; catching a coming lockout while there's still time to warn the user.</div></div>
       </div>
       <div class="gate" data-gate="2">
         <div class="num">02</div>
         <div><h3>PCR verification <span class="chev">+</span></h3>
-        <div class="desc">After the update completes, the real boot measurements are checked against what was predicted. A mismatch here means something unexpected happened — re-enrollment stops immediately.</div></div>
+        <div class="desc">After the update completes, the real PCR fingerprint is checked against what was predicted. A mismatch here means something unexpected happened &mdash; re-enrollment stops immediately.</div></div>
       </div>
       <div class="gate" data-gate="3">
         <div class="num">03</div>
         <div><h3>Device authentication <span class="chev">+</span></h3>
-        <div class="desc">A matching PCR state alone isn't proof of identity — it could in principle be satisfied by different hardware presenting the same measurements. This gate requires a valid TPM-backed device certificate too.</div></div>
+        <div class="desc">A matching fingerprint alone isn't proof of identity &mdash; it could in principle be satisfied by different hardware presenting the same measurements. This gate requires a valid TPM-backed device certificate too.</div></div>
       </div>
       <div class="gate" data-gate="4">
         <div class="num">04</div>
         <div><h3>Automatic re-enrollment <span class="chev">+</span></h3>
-        <div class="desc">Only once both checks pass does the system reseal the disk key against the new, verified boot state — automatically, with no manual recovery key entry.</div></div>
+        <div class="desc">Only once both checks pass does the system reseal the disk key against the new, verified boot state &mdash; automatically, with no manual recovery key entry.</div></div>
       </div>
     </div>
   </section>
@@ -266,7 +343,7 @@
       <div class="usecase-card">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C97B3E" stroke-width="1.5"><path d="M4 21v-6a4 4 0 014-4h8a4 4 0 014 4v6"/><circle cx="12" cy="7" r="3"/></svg>
         <h4>Healthcare &amp; regulated devices</h4>
-        <p>Encrypted patient-record systems and medical devices often can't tolerate an unplanned reboot into a locked state — predictable, auditable unlock behavior matters.</p>
+        <p>Encrypted patient-record systems and medical devices often can't tolerate an unplanned reboot into a locked state &mdash; predictable, auditable unlock behavior matters.</p>
         <div class="stat">impact: fewer compliance-relevant incidents</div>
       </div>
       <div class="usecase-card">
@@ -284,25 +361,80 @@
     </div>
   </section>
 
+  <section id="research">
+    <p class="eyebrow reveal">06 — for researchers &amp; reviewers</p>
+    <h2 class="reveal">Technical implementation detail</h2>
+    <p class="section-lede reveal">The plain-language explanations above map directly onto these commands and mechanisms &mdash; nothing here is simplified further.</p>
+
+    <div class="research-card reveal">
+      <h4>LUKS2 volume + TPM2 keyslot enrollment</h4>
+      <p>The disk is formatted and opened as a standard LUKS2 volume, then a TPM2-backed keyslot is enrolled and bound to a specific PCR set.</p>
+      <div class="codeblock"><span class="c1"># format + open</span>
+cryptsetup luksFormat /dev/sdXN
+cryptsetup luksOpen /dev/sdXN tpmsecure_vol
+
+<span class="c1"># bind unlock to current PCR state</span>
+systemd-cryptenroll --tpm2-device=auto \
+  --tpm2-pcrs=0+1+2+3+4+5+6+7 /dev/sdXN</div>
+    </div>
+
+    <div class="research-card reveal">
+      <h4>Pre-flight PCR prediction</h4>
+      <p>Before an update, the predicted post-update PCR state is computed from the boot event log and compared against the currently sealed policy.</p>
+      <div class="codeblock"><span class="c1"># build boot-event policy, then predict</span>
+systemd-pcrlock make-policy
+systemd-pcrlock predict</div>
+    </div>
+
+    <div class="research-card reveal">
+      <h4>Device identity certificate (original contribution)</h4>
+      <p>A TPM-resident primary key anchors a device identity certificate, checked independently of PCR state before re-enrollment proceeds.</p>
+      <div class="codeblock"><span class="c1"># TPM-resident key + self-signed device cert</span>
+tpm2_createprimary -C o -g sha256 -G rsa -c primary.ctx
+openssl genrsa -out device_key.pem 2048
+openssl req -new -key device_key.pem -out device.csr \
+  -subj "/CN=tpmsecure-device"
+openssl x509 -req -in device.csr -signkey device_key.pem \
+  -out device_cert.pem -days 365
+
+<span class="c1"># verification against known-good fingerprint</span>
+openssl x509 -in device_cert.pem -noout -fingerprint -sha256</div>
+    </div>
+
+    <div class="research-card reveal">
+      <h4>Validated failure mode (Scenario B)</h4>
+      <p>A deliberate PCR extension was used to simulate a genuine boot-state change, confirming the TPM correctly refuses to unseal and cryptsetup falls back to passphrase authentication rather than failing silently.</p>
+      <div class="codeblock"><span class="c1">$ tpm2_pcrextend 3:sha256=0000...0000
+$ cryptsetup open /dev/loop0 testcrypt2</span>
+Failed to unseal secret using TPM2: State not recoverable
+Enter passphrase for /home/.../testdisk.img: _</div>
+    </div>
+
+    <div class="research-card reveal">
+      <h4>Known implementation limitation</h4>
+      <p><span class="mono">systemd-pcrlock</span> policy-based TPM sealing showed OR-policy session instability under the <span class="mono">swtpm</span> software TPM emulator used for development. Direct PCR-list enrollment (<span class="mono">--tpm2-pcrs=</span>) is used for the actual disk seal, while <span class="mono">systemd-pcrlock predict</span> is retained for the pre-flight prediction stage. This is documented rather than hidden, since it reflects a genuine emulator constraint rather than a design flaw.</p>
+    </div>
+  </section>
+
   <section id="faq">
-    <p class="eyebrow reveal">06 — questions</p>
+    <p class="eyebrow reveal">07 — questions</p>
     <h2 class="reveal">Common questions</h2>
     <div class="reveal">
       <div class="faq-item" data-faq>
         <h4>Does this replace LUKS or the TPM? <span class="plus">+</span></h4>
-        <div class="a">No — it sits on top of both. LUKS still does the actual encryption, and the TPM still does the actual sealing. TPMSecure adds prediction, verification, and identity-checking around that existing mechanism.</div>
+        <div class="a">No &mdash; it sits on top of both. LUKS still does the actual encryption, and the TPM still does the actual sealing. TPMSecure adds prediction, verification, and identity-checking around that existing mechanism.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>What happens if the prediction is wrong? <span class="plus">+</span></h4>
-        <div class="a">The system never trusts the prediction blindly — it always re-verifies the real, observed PCR state after the update actually happens. Prediction only provides an early warning, not the final decision.</div>
+        <div class="a">The system never trusts the prediction blindly &mdash; it always re-verifies the real, observed PCR state after the update actually happens. Prediction only provides an early warning, not the final decision.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>Why is a device certificate needed if PCRs already match? <span class="plus">+</span></h4>
-        <div class="a">PCR values describe the state of software and firmware — not which physical device produced them. The certificate ties re-enrollment to a specific piece of hardware, closing that gap.</div>
+        <div class="a">PCR values describe the state of software and firmware &mdash; not which physical device produced them. The certificate ties re-enrollment to a specific piece of hardware, closing that gap.</div>
       </div>
       <div class="faq-item" data-faq>
         <h4>What if both checks fail? <span class="plus">+</span></h4>
-        <div class="a">The system refuses automatic re-enrollment entirely and falls back to the normal manual passphrase — the same safety net that exists today, just reached only when genuinely needed.</div>
+        <div class="a">The system refuses automatic re-enrollment entirely and falls back to the normal manual passphrase &mdash; the same safety net that exists today, just reached only when genuinely needed.</div>
       </div>
     </div>
   </section>
@@ -310,65 +442,74 @@
 </div>
 
 <footer>
-  <div class="wrap">TPMSecure — built on TPM 2.0, LUKS2, systemd-cryptenroll, and systemd-pcrlock.</div>
+  <div class="wrap">TPMSecure &mdash; built on TPM 2.0, LUKS2, systemd-cryptenroll, and systemd-pcrlock.</div>
 </footer>
 
 <script>
-  const progress = document.getElementById('progress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement;
-    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  var progress = document.getElementById('progress');
+  window.addEventListener('scroll', function() {
+    var h = document.documentElement;
+    var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
     progress.style.width = pct + '%';
   });
 
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold: 0.15 });
-  revealEls.forEach(el => io.observe(el));
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.12 });
+  revealEls.forEach(function(el) { io.observe(el); });
 
-  const sections = document.querySelectorAll('section[id]');
-  const dots = document.querySelectorAll('#dotnav a');
-  const navIo = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      const dot = document.querySelector(`#dotnav a[data-sec="${e.target.id}"]`);
+  var sections = document.querySelectorAll('section[id]');
+  var dots = document.querySelectorAll('#dotnav a');
+  var navIo = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      var dot = document.querySelector('#dotnav a[data-sec="' + e.target.id + '"]');
       if (!dot) return;
       if (e.isIntersecting) {
-        dots.forEach(d => d.classList.remove('active'));
+        dots.forEach(function(d) { d.classList.remove('active'); });
         dot.classList.add('active');
       }
     });
   }, { threshold: 0.5 });
-  sections.forEach(s => navIo.observe(s));
+  sections.forEach(function(s) { navIo.observe(s); });
 
-  document.querySelectorAll('.gate').forEach(gate => {
-    gate.addEventListener('click', () => {
-      const isOpen = gate.classList.contains('open');
-      document.querySelectorAll('.gate').forEach(g => g.classList.remove('open'));
+  document.querySelectorAll('.go-deeper-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = document.getElementById(btn.dataset.target);
+      var isOpen = target.classList.contains('open');
+      target.classList.toggle('open');
+      btn.innerHTML = isOpen ? 'go deeper &#8964;' : 'show less &#8963;';
+    });
+  });
+
+  document.querySelectorAll('.gate').forEach(function(gate) {
+    gate.addEventListener('click', function() {
+      var isOpen = gate.classList.contains('open');
+      document.querySelectorAll('.gate').forEach(function(g) { g.classList.remove('open'); });
       if (!isOpen) gate.classList.add('open');
     });
   });
 
-  document.querySelectorAll('[data-faq]').forEach(item => {
-    item.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('[data-faq]').forEach(f => f.classList.remove('open'));
+  document.querySelectorAll('[data-faq]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('[data-faq]').forEach(function(f) { f.classList.remove('open'); });
       if (!isOpen) item.classList.add('open');
     });
   });
 
-  const scenarios = {
+  var scenarios = {
     a: {
       lines: [
         { t: '$ systemd-pcrlock predict', c: 'dim-line' },
         { t: 'predicted PCR state matches current seal', c: 'pass-line' },
         { t: '$ apply update && reboot', c: 'dim-line' },
         { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
-        { t: 'PCR check: observed state matches prediction ✓', c: 'pass-line' },
+        { t: 'PCR check: observed state matches prediction OK', c: 'pass-line' },
         { t: '$ openssl x509 -in device_cert.pem -noout -fingerprint', c: 'dim-line' },
-        { t: 'fingerprint matches known-good record ✓', c: 'pass-line' },
+        { t: 'fingerprint matches known-good record OK', c: 'pass-line' },
         { t: '$ systemd-cryptenroll --tpm2-pcrs=0+1+2+3+4+5+6+7 /dev/sda2', c: 'dim-line' },
-        { t: 're-enrollment complete — disk resealed to new trusted state', c: 'pass-line' },
+        { t: 're-enrollment complete -- disk resealed to new trusted state', c: 'pass-line' }
       ],
       nodes: { predict: 'pass', pcr: 'pass', cert: 'pass', reenroll: 'pass' },
       outcome: { type: 'pass', text: 'RESULT: unlocked automatically. New boot state re-sealed. No manual action needed.' }
@@ -381,11 +522,11 @@
         { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
         { t: 'observed PCR 3: 369bb94ceb...335e70ad', c: 'refuse-line' },
         { t: 'ERROR: Failed to unseal secret using TPM2: state not recoverable', c: 'refuse-line' },
-        { t: 'PCR mismatch detected — refusing automatic unlock', c: 'refuse-line' },
-        { t: 'falling back to manual passphrase entry', c: 'dim-line' },
+        { t: 'PCR mismatch detected -- refusing automatic unlock', c: 'refuse-line' },
+        { t: 'falling back to manual passphrase entry', c: 'dim-line' }
       ],
       nodes: { predict: 'pass', pcr: 'fail', cert: 'idle', reenroll: 'fail' },
-      outcome: { type: 'fail', text: 'RESULT: refused before device check. Falls back to manual passphrase — no silent lockout.' }
+      outcome: { type: 'fail', text: 'RESULT: refused before device check. Falls back to manual passphrase -- no silent lockout.' }
     },
     c: {
       lines: [
@@ -393,53 +534,59 @@
         { t: 'predicted PCR state matches current seal', c: 'pass-line' },
         { t: '$ apply update && reboot', c: 'dim-line' },
         { t: '$ cryptsetup open /dev/sda2 rootcrypt', c: 'dim-line' },
-        { t: 'PCR check: observed state matches prediction ✓', c: 'pass-line' },
+        { t: 'PCR check: observed state matches prediction OK', c: 'pass-line' },
         { t: '$ openssl x509 -in presented_cert.pem -noout -fingerprint', c: 'dim-line' },
         { t: 'sha256 Fingerprint=43:BB:9E:05:9B:F4:...:F4:AB', c: 'dim-line' },
         { t: 'known-good Fingerprint=66:71:B0:5F:ED:...:65:4F', c: 'dim-line' },
-        { t: 'Certificate mismatch — refusing re-enrollment', c: 'refuse-line' },
+        { t: 'Certificate mismatch -- refusing re-enrollment', c: 'refuse-line' }
       ],
       nodes: { predict: 'pass', pcr: 'pass', cert: 'fail', reenroll: 'fail' },
-      outcome: { type: 'fail', text: 'RESULT: PCR matched, but the device certificate didn\'t. Re-enrollment refused independently of the PCR check.' }
+      outcome: { type: 'fail', text: "RESULT: PCR matched, but the device certificate didn't. Re-enrollment refused independently of the PCR check." }
     }
   };
 
-  const termEl = document.getElementById('terminalOut');
-  const banner = document.getElementById('outcomeBanner');
-  const nodeEls = document.querySelectorAll('.sim-node');
-  let running = false;
+  var termEl = document.getElementById('terminalOut');
+  var banner = document.getElementById('outcomeBanner');
+  var nodeEls = document.querySelectorAll('.sim-node');
+  var running = false;
 
   function resetStage() {
-    nodeEls.forEach(n => {
+    nodeEls.forEach(function(n) {
       n.classList.remove('pass', 'fail');
       n.querySelector('.state').textContent = 'idle';
     });
     banner.classList.remove('show', 'pass', 'fail');
   }
 
+  function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
   async function runScenario(key) {
     if (running) return;
     running = true;
-    document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`[data-scenario="${key}"]`).classList.add('active');
+    document.querySelectorAll('.sim-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelector('[data-scenario="' + key + '"]').classList.add('active');
     resetStage();
     termEl.innerHTML = '';
-    const data = scenarios[key];
+    var data = scenarios[key];
 
-    for (const line of data.lines) {
+    for (var i = 0; i < data.lines.length; i++) {
       await sleep(400);
-      const div = document.createElement('div');
+      var line = data.lines[i];
+      var div = document.createElement('div');
       div.className = line.c;
       div.textContent = line.t;
       termEl.appendChild(div);
       termEl.scrollTop = termEl.scrollHeight;
     }
-    const cursorDiv = document.createElement('div');
+    var cursorDiv = document.createElement('div');
     cursorDiv.innerHTML = '$ <span class="cursor"></span>';
     termEl.appendChild(cursorDiv);
 
-    for (const [k, state] of Object.entries(data.nodes)) {
-      const el = document.querySelector(`[data-node="${k}"]`);
+    var keys = Object.keys(data.nodes);
+    for (var j = 0; j < keys.length; j++) {
+      var k = keys[j];
+      var state = data.nodes[k];
+      var el = document.querySelector('[data-node="' + k + '"]');
       if (state === 'idle') continue;
       el.classList.add(state);
       el.querySelector('.state').textContent = state === 'pass' ? 'passed' : 'refused';
@@ -450,10 +597,8 @@
     running = false;
   }
 
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-  document.querySelectorAll('.sim-btn').forEach(btn => {
-    btn.addEventListener('click', () => runScenario(btn.dataset.scenario));
+  document.querySelectorAll('.sim-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { runScenario(btn.dataset.scenario); });
   });
 </script>
 
